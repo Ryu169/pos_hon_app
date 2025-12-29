@@ -51,6 +51,21 @@
         android:layout_marginTop="8dp"
         android:layout_weight="1" />
 
+    <TextView
+        android:id="@+id/tvTransactionList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Belum ada transaksi" />
+
+    <TextView
+        android:id="@+id/tvSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ringkasan Hari Ini"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp" />
+
+
     <!-- ACTION BUTTON -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -67,3 +82,12 @@
 
         <Button
             android:id="@+id/btnPrint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="CETAK" />
+
+    </LinearLayout>
+
+</LinearLayout>

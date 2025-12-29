@@ -1,6 +1,7 @@
 package com.example.poshon.ui.pos
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -14,9 +15,13 @@ import com.example.poshon.data.database.PosDatabase
 import com.example.poshon.data.entity.TransactionEntity
 import com.example.poshon.util.PrinterHelper
 import kotlinx.coroutines.launch
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+
 
 class PosActivity : AppCompatActivity() {
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pos)
@@ -42,6 +47,15 @@ class PosActivity : AppCompatActivity() {
         val btnPrint = findViewById<Button>(R.id.btnPrint)
         val tvTotalIncome = findViewById<TextView>(R.id.tvTotalIncome)
         val tvTransactionList = findViewById<TextView>(R.id.tvTransactionList)
+        val btnReset = findViewById<Button>(R.id.btnReset)
+        val rvTransaction = findViewById<RecyclerView>(R.id.rvTransaction)
+        val adapter = TransactionAdapter(emptyList())
+        val tvSummary = findViewById<TextView>(R.id.tvSummary)
+
+
+        rvTransaction.layoutManager = LinearLayoutManager(this)
+        rvTransaction.adapter = adapter
+
 
         val database = PosDatabase.getInstance(this)
         val transactionDao = database.transactionDao()
@@ -51,7 +65,9 @@ class PosActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 val transactions = transactionDao.getAllTransactions()
                 val totalIncome = transactionDao.getTotalIncome() ?: 0
+                val count = transactionDao.getTransactionCount()
 
+                tvSummary.text = "Jumlah Transaksi: $count"
                 tvTotalIncome.text = "Total Omzet: Rp $totalIncome"
 
                 if (transactions.isEmpty()) {
@@ -63,6 +79,13 @@ class PosActivity : AppCompatActivity() {
                     }
                     tvTransactionList.text = builder.toString()
                 }
+            }
+        }
+
+        btnReset.setOnClickListener {
+            lifecycleScope.launch {
+                transactionDao.deleteAll()
+                refreshData()
             }
         }
 

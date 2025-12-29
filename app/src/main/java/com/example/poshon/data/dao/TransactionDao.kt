@@ -11,9 +11,16 @@ interface TransactionDao {
     @Insert
     suspend fun insertTransaction(transaction: TransactionEntity)
 
-    @Query("SELECT * FROM transactions ORDER BY timestamp DESC")
+    @Query("SELECT * FROM transactions")
     suspend fun getAllTransactions(): List<TransactionEntity>
 
     @Query("SELECT SUM(total) FROM transactions")
     suspend fun getTotalIncome(): Int?
+
+    @Query("DELETE FROM transactions")
+    suspend fun deleteAll()
+
+    @Query("SELECT COUNT(*) FROM transactions")
+    suspend fun getTransactionCount(): Int
+
 }
