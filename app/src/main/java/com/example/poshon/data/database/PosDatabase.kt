@@ -14,7 +14,7 @@ import com.example.poshon.data.entity.TransactionEntity
         ProductEntity::class,
         TransactionEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class PosDatabase : RoomDatabase() {

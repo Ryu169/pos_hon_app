@@ -20,11 +20,10 @@
         android:inputType="number" />
 
     <Button
-        android:id="@+id/btnAddProduct"
+        android:id="@+id/btnSaveProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="SIMPAN PRODUK" />
+        android:text="SIMPAN PRODUK"/>
 
     <!-- LIST PRODUK -->
     <androidx.recyclerview.widget.RecyclerView

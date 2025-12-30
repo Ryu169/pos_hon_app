@@ -17,6 +17,9 @@ import com.example.poshon.util.PrinterHelper
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import android.content.Intent
+import com.example.poshon.ui.product.ProductActivity
+
 
 
 class PosActivity : AppCompatActivity() {
@@ -51,11 +54,11 @@ class PosActivity : AppCompatActivity() {
         val rvTransaction = findViewById<RecyclerView>(R.id.rvTransaction)
         val adapter = TransactionAdapter(emptyList())
         val tvSummary = findViewById<TextView>(R.id.tvSummary)
-
+        val btnProduct = findViewById<Button>(R.id.btnProduct)
+        val btnSaveProduct = findViewById<Button>(R.id.btnSaveProduct)
 
         rvTransaction.layoutManager = LinearLayoutManager(this)
         rvTransaction.adapter = adapter
-
 
         val database = PosDatabase.getInstance(this)
         val transactionDao = database.transactionDao()
@@ -88,6 +91,12 @@ class PosActivity : AppCompatActivity() {
                 refreshData()
             }
         }
+
+        btnProduct.setOnClickListener {
+            val intent = Intent(this, ProductActivity::class.java)
+            startActivity(intent)
+        }
+
 
         btnSave.setOnClickListener {
             val productName = etProductName.text.toString()

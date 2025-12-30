@@ -16,6 +16,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PointOfSaleHON">
+
+        <activity android:name=".ui.product.ProductActivity" />
         <activity
             android:name=".ui.pos.PosActivity"
             android:exported="true">
