@@ -7,8 +7,14 @@ import androidx.room.PrimaryKey
 data class TransactionEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+
+    val productId: Int,
     val productName: String,
+
     val quantity: Int,
     val price: Int,
-    val total: Int
+    val total: Int,
+
+    val createdAt: Long = System.currentTimeMillis()
 )
+

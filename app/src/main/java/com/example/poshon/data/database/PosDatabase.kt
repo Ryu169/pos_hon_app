@@ -14,7 +14,7 @@ import com.example.poshon.data.entity.TransactionEntity
         ProductEntity::class,
         TransactionEntity::class
     ],
-    version = 2,
+    version = 2, // ⬅️ NAIKKAN VERSION
     exportSchema = false
 )
 abstract class PosDatabase : RoomDatabase() {
@@ -23,20 +23,21 @@ abstract class PosDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao
 
     companion object {
-
         @Volatile
         private var INSTANCE: PosDatabase? = null
 
         fun getInstance(context: Context): PosDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
+                Room.databaseBuilder(
                     context.applicationContext,
                     PosDatabase::class.java,
-                    "pos_database"
-                ).build()
-                INSTANCE = instance
-                instance
+                    "pos_db"
+                )
+                    .fallbackToDestructiveMigration() // ⬅️ PENTING
+                    .build()
+                    .also { INSTANCE = it }
             }
         }
     }
 }
+

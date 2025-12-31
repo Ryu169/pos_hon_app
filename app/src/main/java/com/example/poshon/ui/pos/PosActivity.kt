@@ -1,7 +1,7 @@
 package com.example.poshon.ui.pos
 
 import android.Manifest
-import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -10,81 +10,123 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.poshon.R
-import com.example.poshon.data.database.PosDatabase
-import com.example.poshon.data.entity.TransactionEntity
-import com.example.poshon.util.PrinterHelper
-import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.content.Intent
+import com.example.poshon.R
+import com.example.poshon.data.database.PosDatabase
+import com.example.poshon.data.entity.ProductEntity
+import com.example.poshon.data.entity.TransactionEntity
 import com.example.poshon.ui.product.ProductActivity
-
-
+import com.example.poshon.util.PrinterHelper
+import kotlinx.coroutines.launch
 
 class PosActivity : AppCompatActivity() {
 
-    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pos)
 
-        // 🔐 CEK & MINTA PERMISSION BLUETOOTH (ANDROID 12+)
-        if (!checkBluetoothPermission()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(
-                        Manifest.permission.BLUETOOTH_CONNECT,
-                        Manifest.permission.BLUETOOTH_SCAN
-                    ),
-                    1001
-                )
-            }
+        // 🔐 Permission Bluetooth
+        if (!checkBluetoothPermission() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN
+                ),
+                1001
+            )
         }
 
-        val etProductName = findViewById<EditText>(R.id.etProductName)
+        // UI
+        val spinnerProduct = findViewById<Spinner>(R.id.spinnerProduct)
         val etQuantity = findViewById<EditText>(R.id.etQuantity)
-        val etPrice = findViewById<EditText>(R.id.etPrice)
         val btnSave = findViewById<Button>(R.id.btnSave)
         val btnPrint = findViewById<Button>(R.id.btnPrint)
-        val tvTotalIncome = findViewById<TextView>(R.id.tvTotalIncome)
-        val tvTransactionList = findViewById<TextView>(R.id.tvTransactionList)
         val btnReset = findViewById<Button>(R.id.btnReset)
+        val btnProduct = findViewById<Button>(R.id.btnProduct)
+        val tvTotalIncome = findViewById<TextView>(R.id.tvTotalIncome)
+        val tvSummary = findViewById<TextView>(R.id.tvSummary)
+
         val rvTransaction = findViewById<RecyclerView>(R.id.rvTransaction)
         val adapter = TransactionAdapter(emptyList())
-        val tvSummary = findViewById<TextView>(R.id.tvSummary)
-        val btnProduct = findViewById<Button>(R.id.btnProduct)
-        val btnSaveProduct = findViewById<Button>(R.id.btnSaveProduct)
-
         rvTransaction.layoutManager = LinearLayoutManager(this)
         rvTransaction.adapter = adapter
 
+        // Database
         val database = PosDatabase.getInstance(this)
         val transactionDao = database.transactionDao()
+        val productDao = database.productDao()
         val printerHelper = PrinterHelper()
 
+        var productList: List<ProductEntity> = emptyList()
+
+        // 🔄 Load Produk ke Spinner
+        lifecycleScope.launch {
+            productList = productDao.getAllProducts()
+
+            val productNames = productList.map {
+                "${it.name} - Rp ${it.price}"
+            }
+
+            val spinnerAdapter = ArrayAdapter(
+                this@PosActivity,
+                android.R.layout.simple_spinner_item,
+                productNames
+            )
+            spinnerAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item
+            )
+            spinnerProduct.adapter = spinnerAdapter
+        }
+
+        // 🔄 Refresh transaksi
         fun refreshData() {
             lifecycleScope.launch {
                 val transactions = transactionDao.getAllTransactions()
                 val totalIncome = transactionDao.getTotalIncome() ?: 0
                 val count = transactionDao.getTransactionCount()
 
+                adapter.updateData(transactions)
                 tvSummary.text = "Jumlah Transaksi: $count"
                 tvTotalIncome.text = "Total Omzet: Rp $totalIncome"
-
-                if (transactions.isEmpty()) {
-                    tvTransactionList.text = "Belum ada transaksi"
-                } else {
-                    val builder = StringBuilder()
-                    transactions.forEach {
-                        builder.append("${it.productName} x${it.quantity} = Rp ${it.total}\n")
-                    }
-                    tvTransactionList.text = builder.toString()
-                }
             }
         }
 
+        // ➕ Simpan Transaksi
+        btnSave.setOnClickListener {
+            if (productList.isEmpty()) {
+                Toast.makeText(this, "Produk belum ada", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val qtyText = etQuantity.text.toString()
+            if (qtyText.isBlank()) {
+                Toast.makeText(this, "Qty wajib diisi", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val selectedProduct = productList[spinnerProduct.selectedItemPosition]
+            val quantity = qtyText.toInt()
+            val total = quantity * selectedProduct.price
+
+            lifecycleScope.launch {
+                transactionDao.insertTransaction(
+                    TransactionEntity(
+                        productId = selectedProduct.id,
+                        productName = selectedProduct.name,
+                        quantity = quantity,
+                        price = selectedProduct.price,
+                        total = total
+                    )
+                )
+                refreshData()
+            }
+
+            etQuantity.text.clear()
+        }
+
+        // 🗑 Reset
         btnReset.setOnClickListener {
             lifecycleScope.launch {
                 transactionDao.deleteAll()
@@ -92,76 +134,30 @@ class PosActivity : AppCompatActivity() {
             }
         }
 
-        btnProduct.setOnClickListener {
-            val intent = Intent(this, ProductActivity::class.java)
-            startActivity(intent)
-        }
-
-
-        btnSave.setOnClickListener {
-            val productName = etProductName.text.toString()
-            val qtyText = etQuantity.text.toString()
-            val priceText = etPrice.text.toString()
-
-            if (productName.isBlank() || qtyText.isBlank() || priceText.isBlank()) {
-                Toast.makeText(this, "Semua field wajib diisi", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val quantity = qtyText.toInt()
-            val price = priceText.toInt()
-            val total = quantity * price
-
-            lifecycleScope.launch {
-                transactionDao.insertTransaction(
-                    TransactionEntity(
-                        productName = productName,
-                        quantity = quantity,
-                        price = price,
-                        total = total
-                    )
-                )
-                refreshData()
-            }
-
-            etProductName.text.clear()
-            etQuantity.text.clear()
-            etPrice.text.clear()
-        }
-
-        // 🧾 CETAK STRUK
+        // 🧾 Print
         btnPrint.setOnClickListener {
             if (!checkBluetoothPermission()) {
-                Toast.makeText(
-                    this,
-                    "Izin Bluetooth belum diberikan",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this, "Izin Bluetooth belum diberikan", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             lifecycleScope.launch {
                 val transactions = transactionDao.getAllTransactions()
                 val totalIncome = transactionDao.getTotalIncome() ?: 0
-
-                if (transactions.isEmpty()) {
-                    Toast.makeText(
-                        this@PosActivity,
-                        "Tidak ada transaksi",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@launch
+                if (transactions.isNotEmpty()) {
+                    printerHelper.print(buildReceipt(transactions, totalIncome))
                 }
-
-                val receiptText = buildReceipt(transactions, totalIncome)
-                printerHelper.print(receiptText)
             }
+        }
+
+        // 📦 Produk
+        btnProduct.setOnClickListener {
+            startActivity(Intent(this, ProductActivity::class.java))
         }
 
         refreshData()
     }
 
-    // 🔐 FUNGSI CEK PERMISSION (CONNECT + SCAN)
     private fun checkBluetoothPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             ContextCompat.checkSelfPermission(
@@ -172,30 +168,22 @@ class PosActivity : AppCompatActivity() {
                         this,
                         Manifest.permission.BLUETOOTH_SCAN
                     ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            true
-        }
+        } else true
     }
 
-    // 🧾 FORMAT STRUK
     private fun buildReceipt(
         transactions: List<TransactionEntity>,
         total: Int
     ): String {
-        val builder = StringBuilder()
-
-        builder.append("POS UMKM\n")
-        builder.append("------------------------------\n")
-
+        val sb = StringBuilder()
+        sb.append("POS UMKM\n")
+        sb.append("------------------------------\n")
         transactions.forEach {
-            builder.append("${it.productName} x${it.quantity}\n")
-            builder.append("Rp ${it.total}\n")
+            sb.append("${it.productName} x${it.quantity}\n")
+            sb.append("Rp ${it.total}\n")
         }
-
-        builder.append("------------------------------\n")
-        builder.append("TOTAL : Rp $total\n\n")
-        builder.append("Terima kasih\n\n\n")
-
-        return builder.toString()
+        sb.append("------------------------------\n")
+        sb.append("TOTAL : Rp $total\n\nTerima kasih\n\n\n")
+        return sb.toString()
     }
 }

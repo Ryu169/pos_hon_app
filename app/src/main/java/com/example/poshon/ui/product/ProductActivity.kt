@@ -65,7 +65,11 @@ class ProductActivity : AppCompatActivity() {
     private fun saveProduct(name: String, price: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             db.productDao().insertProduct(
-                ProductEntity(name = name, price = price)
+                ProductEntity(
+                    name = name,
+                    price = price,
+                    stock = 0 // ✅ WAJIB DITAMBAHKAN
+                )
             )
             loadProducts()
         }
