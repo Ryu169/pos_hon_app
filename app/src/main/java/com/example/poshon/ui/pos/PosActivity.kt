@@ -38,7 +38,7 @@ class PosActivity : AppCompatActivity() {
             )
         }
 
-        // UI
+        // UI Initialization
         val spinnerProduct = findViewById<Spinner>(R.id.spinnerProduct)
         val etQuantity = findViewById<EditText>(R.id.etQuantity)
         val btnSave = findViewById<Button>(R.id.btnSave)
@@ -53,11 +53,13 @@ class PosActivity : AppCompatActivity() {
         rvTransaction.layoutManager = LinearLayoutManager(this)
         rvTransaction.adapter = adapter
 
-        // Database
+        // Database & Helper
         val database = PosDatabase.getInstance(this)
         val transactionDao = database.transactionDao()
         val productDao = database.productDao()
-        val printerHelper = PrinterHelper()
+
+        // UPDATE 1: Pass 'this' (Context) ke PrinterHelper
+        val printerHelper = PrinterHelper(this)
 
         var productList: List<ProductEntity> = emptyList()
 
@@ -134,7 +136,24 @@ class PosActivity : AppCompatActivity() {
             }
         }
 
-        // 🧾 Print
+        // ==========================================================
+        // UPDATE 2: FITUR PRINTER (Long Click & Click)
+        // ==========================================================
+
+        // A. Long Click: Untuk Scan & Pilih Printer (Connect)
+        btnPrint.setOnLongClickListener {
+            if (checkBluetoothPermission()) {
+                printerHelper.browseBluetoothDevice { deviceName ->
+                    // Callback saat printer dipilih, ubah teks tombol agar user tahu
+                    btnPrint.text = "Print ($deviceName)"
+                }
+            } else {
+                Toast.makeText(this, "Izin Bluetooth Diperlukan", Toast.LENGTH_SHORT).show()
+            }
+            true // Return true menandakan event sudah di-handle
+        }
+
+        // B. Click Biasa: Untuk Mencetak Struk
         btnPrint.setOnClickListener {
             if (!checkBluetoothPermission()) {
                 Toast.makeText(this, "Izin Bluetooth belum diberikan", Toast.LENGTH_SHORT).show()
@@ -144,13 +163,19 @@ class PosActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 val transactions = transactionDao.getAllTransactions()
                 val totalIncome = transactionDao.getTotalIncome() ?: 0
+
                 if (transactions.isNotEmpty()) {
-                    printerHelper.print(buildReceipt(transactions, totalIncome))
+                    // Panggil fungsi baru di Helper yang sudah support 58mm
+                    printerHelper.printReceipt(transactions, totalIncome)
+                } else {
+                    Toast.makeText(this@PosActivity, "Belum ada transaksi untuk dicetak", Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
-        // 📦 Produk
+        // ==========================================================
+
+        // 📦 Produk Page
         btnProduct.setOnClickListener {
             startActivity(Intent(this, ProductActivity::class.java))
         }
@@ -171,19 +196,7 @@ class PosActivity : AppCompatActivity() {
         } else true
     }
 
-    private fun buildReceipt(
-        transactions: List<TransactionEntity>,
-        total: Int
-    ): String {
-        val sb = StringBuilder()
-        sb.append("POS UMKM\n")
-        sb.append("------------------------------\n")
-        transactions.forEach {
-            sb.append("${it.productName} x${it.quantity}\n")
-            sb.append("Rp ${it.total}\n")
-        }
-        sb.append("------------------------------\n")
-        sb.append("TOTAL : Rp $total\n\nTerima kasih\n\n\n")
-        return sb.toString()
-    }
+    // CATATAN: Fungsi buildReceipt() SAYA HAPUS
+    // Karena logika formatting struk 58mm sudah dipindahkan ke dalam PrinterHelper.kt
+    // agar Activity ini lebih bersih.
 }

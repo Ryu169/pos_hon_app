@@ -16,6 +16,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
+        // --- TAMBAHAN PENTING ---
+        // Ini memberitahu Android Studio untuk mencari library di server JitPack
+        maven { url = uri("https://jitpack.io") }
+        // ------------------------
     }
 }
 
