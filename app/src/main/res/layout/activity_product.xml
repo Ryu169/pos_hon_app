@@ -5,32 +5,46 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- INPUT PRODUK -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kelola Menu Produk"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
     <EditText
         android:id="@+id/etProductName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nama Produk" />
+        android:hint="Nama Produk (cth: Nasi Goreng)" />
 
     <EditText
         android:id="@+id/etProductPrice"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Harga"
+        android:hint="Harga (cth: 15000)"
         android:inputType="number" />
 
     <Button
-        android:id="@+id/btnSaveProduct"
+        android:id="@+id/btnAddProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SIMPAN PRODUK"/>
+        android:text="Tambah Menu"
+        android:layout_marginTop="10dp"/>
 
-    <!-- LIST PRODUK -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Daftar Menu:"
+        android:layout_marginTop="20dp"
+        android:textStyle="bold"/>
+
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvProduct"
+        android:id="@+id/rvProductList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="12dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:layout_marginTop="10dp"/>
 
 </LinearLayout>

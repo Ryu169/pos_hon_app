@@ -12,17 +12,13 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    // UBAH JADI INI (Agar file build.gradle boleh punya repo sendiri)
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
         google()
         mavenCentral()
-
-        // --- TAMBAHAN PENTING ---
-        // Ini memberitahu Android Studio untuk mencari library di server JitPack
         maven { url = uri("https://jitpack.io") }
-        // ------------------------
     }
 }
-
 rootProject.name = "Point of Sale HON"
 include(":app")

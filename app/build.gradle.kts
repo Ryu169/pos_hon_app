@@ -4,6 +4,14 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
 }
 
+// --- PINDAHKAN KE SINI (DI ATAS) ---
+repositories {
+    google()
+    mavenCentral()
+    maven { url = uri("https://jitpack.io") }
+}
+// -----------------------------------
+
 android {
     namespace = "com.example.poshon"
     compileSdk = 34
@@ -39,9 +47,10 @@ android {
 dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    implementation("com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.3.0")
 
-    // PERBAIKAN: Menggunakan add() agar tidak error "Unresolved reference"
+    // Library Printer (Pastikan versi 3.2.0)
+    implementation("com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.2.0")
+
     add("kapt", "androidx.room:room-compiler:2.6.1")
 
     implementation(libs.androidx.core.ktx)

@@ -1,6 +1,7 @@
 package com.example.poshon.ui.pos
 
 import android.Manifest
+import android.app.AlertDialog // Tambahan import untuk Popup
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -58,7 +59,7 @@ class PosActivity : AppCompatActivity() {
         val transactionDao = database.transactionDao()
         val productDao = database.productDao()
 
-        // UPDATE 1: Pass 'this' (Context) ke PrinterHelper
+        // Pass 'this' (Context) ke PrinterHelper
         val printerHelper = PrinterHelper(this)
 
         var productList: List<ProductEntity> = emptyList()
@@ -67,19 +68,29 @@ class PosActivity : AppCompatActivity() {
         lifecycleScope.launch {
             productList = productDao.getAllProducts()
 
-            val productNames = productList.map {
-                "${it.name} - Rp ${it.price}"
-            }
+            if (productList.isNotEmpty()) {
+                val productNames = productList.map {
+                    "${it.name} - Rp ${it.price}"
+                }
 
-            val spinnerAdapter = ArrayAdapter(
-                this@PosActivity,
-                android.R.layout.simple_spinner_item,
-                productNames
-            )
-            spinnerAdapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item
-            )
-            spinnerProduct.adapter = spinnerAdapter
+                val spinnerAdapter = ArrayAdapter(
+                    this@PosActivity,
+                    android.R.layout.simple_spinner_item,
+                    productNames
+                )
+                spinnerAdapter.setDropDownViewResource(
+                    android.R.layout.simple_spinner_dropdown_item
+                )
+                spinnerProduct.adapter = spinnerAdapter
+            } else {
+                // Handle jika produk kosong
+                val emptyAdapter = ArrayAdapter(
+                    this@PosActivity,
+                    android.R.layout.simple_spinner_item,
+                    listOf("Belum ada produk")
+                )
+                spinnerProduct.adapter = emptyAdapter
+            }
         }
 
         // 🔄 Refresh transaksi
@@ -98,7 +109,7 @@ class PosActivity : AppCompatActivity() {
         // ➕ Simpan Transaksi
         btnSave.setOnClickListener {
             if (productList.isEmpty()) {
-                Toast.makeText(this, "Produk belum ada", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Produk belum ada. Tambah dulu!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -108,24 +119,27 @@ class PosActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val selectedProduct = productList[spinnerProduct.selectedItemPosition]
-            val quantity = qtyText.toInt()
-            val total = quantity * selectedProduct.price
+            try {
+                val selectedProduct = productList[spinnerProduct.selectedItemPosition]
+                val quantity = qtyText.toInt()
+                val total = quantity * selectedProduct.price
 
-            lifecycleScope.launch {
-                transactionDao.insertTransaction(
-                    TransactionEntity(
-                        productId = selectedProduct.id,
-                        productName = selectedProduct.name,
-                        quantity = quantity,
-                        price = selectedProduct.price,
-                        total = total
+                lifecycleScope.launch {
+                    transactionDao.insertTransaction(
+                        TransactionEntity(
+                            productId = selectedProduct.id,
+                            productName = selectedProduct.name,
+                            quantity = quantity,
+                            price = selectedProduct.price,
+                            total = total
+                        )
                     )
-                )
-                refreshData()
+                    refreshData()
+                }
+                etQuantity.text.clear()
+            } catch (e: Exception) {
+                Toast.makeText(this, "Error memilih produk", Toast.LENGTH_SHORT).show()
             }
-
-            etQuantity.text.clear()
         }
 
         // 🗑 Reset
@@ -137,45 +151,59 @@ class PosActivity : AppCompatActivity() {
         }
 
         // ==========================================================
-        // UPDATE 2: FITUR PRINTER (Long Click & Click)
+        // FITUR PRINTER (Preview & Connect)
         // ==========================================================
 
-        // A. Long Click: Untuk Scan & Pilih Printer (Connect)
+        // A. Long Click: Untuk Scan & Pilih Printer (Connect Bluetooth)
         btnPrint.setOnLongClickListener {
             if (checkBluetoothPermission()) {
                 printerHelper.browseBluetoothDevice { deviceName ->
-                    // Callback saat printer dipilih, ubah teks tombol agar user tahu
                     btnPrint.text = "Print ($deviceName)"
                 }
             } else {
                 Toast.makeText(this, "Izin Bluetooth Diperlukan", Toast.LENGTH_SHORT).show()
             }
-            true // Return true menandakan event sudah di-handle
+            true
         }
 
-        // B. Click Biasa: Untuk Mencetak Struk
+        // B. Click Biasa: TAMPILKAN PREVIEW / SIMULASI STRUK
         btnPrint.setOnClickListener {
-            if (!checkBluetoothPermission()) {
-                Toast.makeText(this, "Izin Bluetooth belum diberikan", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
             lifecycleScope.launch {
                 val transactions = transactionDao.getAllTransactions()
                 val totalIncome = transactionDao.getTotalIncome() ?: 0
 
                 if (transactions.isNotEmpty()) {
-                    // Panggil fungsi baru di Helper yang sudah support 58mm
-                    printerHelper.printReceipt(transactions, totalIncome)
+                    // 1. Ambil Text Preview dari Helper
+                    val receiptText = printerHelper.getReceiptPreview(transactions, totalIncome)
+
+                    // 2. Tampilkan Popup Dialog
+                    val builder = AlertDialog.Builder(this@PosActivity)
+                    builder.setTitle("Preview Struk (Test Mode)")
+                    builder.setMessage(receiptText) // Menampilkan teks struk
+
+                    // Tombol Tutup
+                    builder.setPositiveButton("Tutup") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+
+                    // (Opsional) Tombol Print Asli jika nanti sudah ada printer
+                    builder.setNeutralButton("🖨️ Print Bluetooth") { _, _ ->
+                        if (checkBluetoothPermission()) {
+                            printerHelper.printReceipt(transactions, totalIncome)
+                        }
+                    }
+
+                    builder.show()
+
                 } else {
-                    Toast.makeText(this@PosActivity, "Belum ada transaksi untuk dicetak", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@PosActivity, "Belum ada transaksi", Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
         // ==========================================================
 
-        // 📦 Produk Page
+        // 📦 Pindah ke Halaman Produk
         btnProduct.setOnClickListener {
             startActivity(Intent(this, ProductActivity::class.java))
         }
@@ -195,8 +223,4 @@ class PosActivity : AppCompatActivity() {
                     ) == PackageManager.PERMISSION_GRANTED
         } else true
     }
-
-    // CATATAN: Fungsi buildReceipt() SAYA HAPUS
-    // Karena logika formatting struk 58mm sudah dipindahkan ke dalam PrinterHelper.kt
-    // agar Activity ini lebih bersih.
 }

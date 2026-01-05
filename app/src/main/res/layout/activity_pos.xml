@@ -5,78 +5,74 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- INPUT TRANSAKSI -->
-    <EditText
-        android:id="@+id/etProductName"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nama Produk" />
+        android:text="Kasir UMKM"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pilih Produk:"/>
+
+    <Spinner
+        android:id="@+id/spinnerProduct"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@android:drawable/btn_dropdown"
+        android:layout_marginBottom="10dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Jumlah (Qty):"/>
 
     <EditText
         android:id="@+id/etQuantity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Qty"
-        android:inputType="number" />
-
-    <EditText
-        android:id="@+id/etPrice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Harga"
-        android:inputType="number" />
-
-    <Spinner
-        android:id="@+id/spinnerProduct"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:hint="0"
+        android:inputType="number"
+        android:layout_marginBottom="10dp"/>
 
     <Button
         android:id="@+id/btnSave"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="SIMPAN TRANSAKSI" />
+        android:text="Tambahkan (+)"
+        android:backgroundTint="#6200EE"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="20dp"/>
 
-    <!-- TOTAL -->
-    <TextView
-        android:id="@+id/tvTotalIncome"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Total Omzet: Rp 0"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:layout_marginTop="16dp" />
-
-    <!-- LIST TRANSAKSI -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTransaction"
         android:layout_width="match_parent"
-        android:layout_height="443dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="25dp"
-        android:layout_weight="1" />
-
-    <TextView
-        android:id="@+id/tvTransactionList"
-        android:layout_width="match_parent"
-        android:layout_height="34dp"
-        android:text="Belum ada transaksi" />
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
     <TextView
         android:id="@+id/tvSummary"
         android:layout_width="match_parent"
-        android:layout_height="37dp"
-        android:layout_marginTop="20dp"
-        android:text="Ringkasan Hari Ini"
-        android:textSize="14sp" />
+        android:layout_height="wrap_content"
+        android:text="Jumlah Transaksi: 0"
+        android:textStyle="italic"/>
 
+    <TextView
+        android:id="@+id/tvTotalIncome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Total: Rp 0"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="10dp"/>
 
-    <!-- ACTION BUTTON -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="59dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <Button
@@ -84,23 +80,25 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="RESET" />
+            android:text="Reset"
+            android:backgroundTint="#B00020"
+            android:layout_marginEnd="5dp"/>
 
         <Button
             android:id="@+id/btnPrint"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="CETAK" />
-
+            android:text="Cetak"
+            android:layout_marginStart="5dp"/>
     </LinearLayout>
 
     <Button
         android:id="@+id/btnProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Kelola Produk" />
-
+        android:text="Kelola Produk"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="#03DAC5"/>
 
 </LinearLayout>
