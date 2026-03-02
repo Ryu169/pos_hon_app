@@ -15,6 +15,7 @@ data class TransactionEntity(
     val price: Int,
     val total: Int,
 
-    val createdAt: Long = System.currentTimeMillis()
-)
+    val createdAt: Long = System.currentTimeMillis(), // Opsional: Waktu masuk keranjang
 
+    val vendor: String // PENTING: Kolom Penanda UMKM ("HON" atau "BERSUA")
+)

@@ -56,7 +56,15 @@ class PrinterHelper(private val context: Context) {
         builder.show()
     }
 
-    fun printReceipt(transactions: List<TransactionEntity>, total: Int) {
+    // 1. UPDATE FUNGSI PRINT (Menambah parameter customerName)
+    fun printReceipt(
+        transactions: List<TransactionEntity>,
+        total: Int,
+        paymentMethod: String,
+        cashReceived: Int,
+        change: Int,
+        customerName: String // ⬅️ Parameter Baru: Nama Pelanggan
+    ) {
         if (selectedConnection == null) {
             Toast.makeText(context, "Tekan tahan tombol Print untuk pilih printer!", Toast.LENGTH_LONG).show()
             return
@@ -69,15 +77,18 @@ class PrinterHelper(private val context: Context) {
 
             val dateNow = SimpleDateFormat("dd/MM/yy HH:mm", Locale.getDefault()).format(Date())
 
+            // Header Struk (Ditambah Baris Nama Pelanggan)
             var textToPrint = """
                 [C]<img>${PrinterTextParserImg.bitmapToHexadecimalString(printer, context.resources.getDrawableForDensity(R.drawable.ic_launcher_foreground, 0))}</img>
                 [C]<b>POS UMKM F&B</b>
                 [C]Jl. Raya Bisnis No. 1
                 [C]================================
-                [L]Tgl : $dateNow
+                [L]Tgl  : $dateNow
+                [L]Nama : $customerName
                 [C]--------------------------------
             """.trimIndent()
 
+            // Loop Barang
             transactions.forEach {
                 val totalItem = it.quantity * it.price
                 val priceString = formatRp.format(it.price).replace("Rp", "").trim()
@@ -89,12 +100,38 @@ class PrinterHelper(private val context: Context) {
 
             val totalFinal = formatRp.format(total).replace("Rp", "Rp ").trim()
 
+            // Footer Total
             textToPrint += """
                 
                 [C]--------------------------------
                 [L]TOTAL :[R]<b>$totalFinal</b>
+            """.trimIndent()
+
+            // RINCIAN PEMBAYARAN
+            if (paymentMethod == "CASH") {
+                val cashString = formatRp.format(cashReceived).replace("Rp", "Rp ").trim()
+                val changeString = formatRp.format(change).replace("Rp", "Rp ").trim()
+
+                textToPrint += """
+                    
+                    [L]Tunai :[R]$cashString
+                    [L]Kembali :[R]$changeString
+                """.trimIndent()
+            } else {
+                // Jika QRIS
+                textToPrint += """
+                    
+                    [L]Bayar :[R]$paymentMethod
+                    [L]Status :[R]LUNAS
+                """.trimIndent()
+            }
+
+            textToPrint += """
+                
                 [C]================================
                 [C]Terima Kasih
+                [C]Simpan struk ini sebagai
+                [C]bukti pembayaran sah.
                 
             """.trimIndent()
 
@@ -106,10 +143,15 @@ class PrinterHelper(private val context: Context) {
         }
     }
 
-    // --- FUNGSI BARU DITAMBAHKAN DI SINI ---
-    // Fungsi ini menghasilkan String biasa untuk ditampilkan di layar HP (Preview)
-    // Tanpa kode printer seperti [C], [L], atau <img> agar mudah dibaca manusia.
-    fun getReceiptPreview(transactions: List<TransactionEntity>, total: Int): String {
+    // 2. UPDATE FUNGSI PREVIEW (Menambah parameter customerName)
+    fun getReceiptPreview(
+        transactions: List<TransactionEntity>,
+        total: Int,
+        paymentMethod: String,
+        cashReceived: Int,
+        change: Int,
+        customerName: String // ⬅️ Parameter Baru
+    ): String {
         val formatRp = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         formatRp.maximumFractionDigits = 0
         val dateNow = SimpleDateFormat("dd/MM/yy HH:mm", Locale.getDefault()).format(Date())
@@ -119,7 +161,8 @@ class PrinterHelper(private val context: Context) {
         text += "        POS UMKM F&B\n"
         text += "    Jl. Raya Bisnis No. 1\n"
         text += "================================\n"
-        text += "Tgl : $dateNow\n"
+        text += "Tgl  : $dateNow\n"
+        text += "Nama : $customerName\n" // ⬅️ Tampilkan Nama di Preview
         text += "--------------------------------\n"
 
         transactions.forEach {
@@ -130,6 +173,15 @@ class PrinterHelper(private val context: Context) {
 
         text += "--------------------------------\n"
         text += "TOTAL : ${formatRp.format(total)}\n"
+
+        if (paymentMethod == "CASH") {
+            text += "Tunai : ${formatRp.format(cashReceived)}\n"
+            text += "Kembali : ${formatRp.format(change)}\n"
+        } else {
+            text += "Bayar : $paymentMethod\n"
+            text += "Status : LUNAS\n"
+        }
+
         text += "================================\n"
         text += "          Terima Kasih\n"
 

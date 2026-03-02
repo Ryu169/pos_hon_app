@@ -2,26 +2,86 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="12dp">
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical"
+    android:background="#FFFFFF">
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvTransactionName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nama Produk"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btnMinus"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@android:drawable/ic_input_delete"
+                android:backgroundTint="#EEEEEE"
+                android:scaleType="fitCenter"
+                android:padding="6dp"/>
+
+            <TextView
+                android:id="@+id/tvTransactionQty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginHorizontal="12dp"/>
+
+            <ImageButton
+                android:id="@+id/btnPlus"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@android:drawable/ic_input_add"
+                android:backgroundTint="#E0E0E0"
+                android:scaleType="fitCenter"
+                android:padding="6dp"/>
+
+            <TextView
+                android:id="@+id/tvTransactionPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@ Rp 15.000"
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+    </LinearLayout>
 
     <TextView
-        android:id="@+id/tvProduct"
+        android:id="@+id/tvTransactionTotal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Produk"
-        android:textStyle="bold" />
+        android:text="Rp 30.000"
+        android:textStyle="bold"
+        android:textColor="#4CAF50"
+        android:layout_marginEnd="12dp"/>
 
-    <TextView
-        android:id="@+id/tvDetail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Qty x Harga" />
+    <ImageButton
+        android:id="@+id/btnDeleteTransaction"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@android:drawable/ic_delete"
+        android:backgroundTint="#F44336"
+        android:tint="#FFFFFF"
+        android:padding="4dp"
+        android:scaleType="fitCenter"/>
 
-    <TextView
-        android:id="@+id/tvTotal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rp 0"
-        android:textStyle="bold" />
 </LinearLayout>

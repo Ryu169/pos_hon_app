@@ -50,6 +50,7 @@ dependencies {
 
     // Library Printer (Pastikan versi 3.2.0)
     implementation("com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.2.0")
+    implementation("io.coil-kt:coil:2.5.0")
 
     add("kapt", "androidx.room:room-compiler:2.6.1")
 

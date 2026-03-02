@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pembayaran"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nama Pelanggan (Opsional)"
+        android:textSize="12sp"
+        android:textColor="#666666"/>
+
+    <EditText
+        android:id="@+id/etCustomerName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Cth: Jali"
+        android:inputType="textPersonName|textCapWords"
+        android:textSize="16sp"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Total Tagihan"
+        android:textSize="12sp"
+        android:textColor="#666666"/>
+
+    <TextView
+        android:id="@+id/tvDialogTotal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Rp 0"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="#4CAF50"
+        android:layout_marginBottom="24dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Uang Diterima (Cash)"
+        android:textSize="12sp"
+        android:textColor="#666666"/>
+
+    <EditText
+        android:id="@+id/etCashReceived"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="0"
+        android:inputType="number"
+        android:textSize="24sp"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"/>
+
+    <TextView
+        android:id="@+id/tvChange"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Kembalian: Rp 0"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:gravity="end"
+        android:textColor="#666666"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="24dp">
+
+        <Button
+            android:id="@+id/btnExactMoney"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Uang Pas"
+            android:backgroundTint="#2196F3"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/btnQris"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="QRIS"
+            android:backgroundTint="#FF9800"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnProcessPayment"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="BAYAR &amp; CETAK STRUK"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="#4CAF50"/>
+
+</LinearLayout>

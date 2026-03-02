@@ -11,7 +11,8 @@ interface ProductDao {
     suspend fun insertProduct(product: ProductEntity)
 
     // READ
-    @Query("SELECT * FROM product ORDER BY name ASC")
+    // PERBAIKAN: Menggunakan 'products' (pakai 's')
+    @Query("SELECT * FROM products ORDER BY name ASC")
     suspend fun getAllProducts(): List<ProductEntity>
 
     // UPDATE
@@ -23,13 +24,16 @@ interface ProductDao {
     suspend fun deleteProduct(product: ProductEntity)
 
     // DELETE ALL
-    @Query("DELETE FROM product")
+    // PERBAIKAN: Menggunakan 'products'
+    @Query("DELETE FROM products")
     suspend fun deleteAllProducts()
 
     // STOCK
-    @Query("UPDATE product SET stock = stock - :qty WHERE id = :productId")
+    // PERBAIKAN: Menggunakan 'products'
+    @Query("UPDATE products SET stock = stock - :qty WHERE id = :productId")
     suspend fun reduceStock(productId: Int, qty: Int)
 
-    @Query("SELECT stock FROM product WHERE id = :productId")
+    // PERBAIKAN: Menggunakan 'products'
+    @Query("SELECT stock FROM products WHERE id = :productId")
     suspend fun getStock(productId: Int): Int?
 }
